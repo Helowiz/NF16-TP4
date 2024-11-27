@@ -35,5 +35,6 @@ int compare_intervalle(T_Inter inter1, T_Inter inter2);
 void viderBuffer();
 T_Noeud* predecesseur(T_Arbre* abr, T_Noeud* n);
 T_Noeud* minimum(T_Arbre* abr);
+void afficher_noeud(T_Noeud* n);
 
 #endif

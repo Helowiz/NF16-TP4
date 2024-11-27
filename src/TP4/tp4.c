@@ -13,34 +13,35 @@ T_Noeud *creer_noeud(int id_entr, char *objet, T_Inter intervalle)
     n->inter = intervalle;
     return n;
 }
+
 void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
 {
+    if(abr == NULL) return;
+
     T_Noeud* n = creer_noeud(id_entr, objet, intervalle);
-    if(abr == NULL) {
-        abr = &n;
-        return;
-    }
     T_Noeud* pred = NULL;
-    T_Noeud* current = &abr;
-    while (current != NULL && compare_intervalle(intervalle, current->inter) != 0){
+    T_Noeud* current = abr;
+
+    while (current != NULL){ //  && compare_intervalle(intervalle, current->inter) != 0 verifire si les deux intervalle ne sont pas egale
         pred = current;
-        if (intervalle.fin < current->inter.deb) {
+        if (intervalle.deb < current->inter.deb) {
             current = current->gauche;
-        } else if (intervalle.deb < current->inter.fin){
+        } else {
             current = current->droit;
         }
     }
-    if (intervalle.fin < pred->inter.deb) {
+
+    if (intervalle.deb < pred->inter.deb) {
         pred->gauche = n;
-        return;
-    } else if (intervalle.deb < pred->inter.fin) {
+    } else if (intervalle.deb > pred->inter.deb) {
         pred->droit = n;
-        return;
+    } else {
+        printf("Les intervalles se chevauche !");
     }
     return;
 }
 T_Noeud* rechercher(T_Arbre abr, T_Inter intervalle, int id_entr){
-    while(abr != NULL /*&& Cle[abrre] != cle*/ ){ /*TODO rechercher avec id entre vérifier que c'est égale*/
+    while(abr != NULL /*&& Cle[abrre] != cle*/ ){ /*TODO rechercher avec id entre vï¿½rifier que c'est ï¿½gale*/
         if(intervalle.fin < abr->inter.deb) {
             abr = abr->gauche;
         } else {
@@ -88,7 +89,12 @@ void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
     ajouter(abr, id_entr, current->objet, nouveau);
     return;
 }
-void afficher_abr(T_Arbre abr){ //TODO creer gestion de pile + struct
+void afficher_abr(T_Arbre abr){
+
+    if (abr == NULL){
+        printf("\nL'arbre est vide");
+    }
+
     Pile* p = creer_pile();
 	T_Noeud* current = abr;
 
@@ -98,7 +104,7 @@ void afficher_abr(T_Arbre abr){ //TODO creer gestion de pile + struct
             current = current->gauche;
         }
 		current = depiler(p);
-        printf("%d", current->id_entr);
+        printf("%d/%d/2024 au %d/%d/2024 : entr. %d - %s", current->inter.deb%100, current->inter.deb%100, current->inter.fin%100, current->inter.fin%100,current->id_entr, current->objet);
         current = current->droit;
     }
 }
@@ -141,7 +147,10 @@ void detruire_arbre(T_Arbre *abr){
 }
 
 void viderBuffer(){
-    //TODO
+    char c;
+    do {
+        c = getchar();
+    } while (c != '\n' && c != EOF);
 }
 
 int compare_intervalle(T_Inter inter1, T_Inter inter2){
@@ -158,4 +167,8 @@ T_Noeud* minimum(T_Arbre* abr){
     //TODO
     T_Noeud* p = NULL;
     return p;
+}
+
+void afficher_noeud(T_Noeud* n){
+    printf("Identifiant entreprise : %d \nObjet : %s Date debut : %d, Date fin : %d", n->id_entr, n->objet, n->inter.deb, n->inter.fin);
 }
