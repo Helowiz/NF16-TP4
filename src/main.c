@@ -10,7 +10,7 @@ int main()
     T_Arbre* arbre = NULL;
     // ============= MENU UTILISATEUR ============= */
     char choix = '0';
-    while (choix != '8') {
+    while (choix != '7') {
         printf("\n======================================");
         printf("\n1. Afficher toutes les reservations");
         printf("\n2. Afficher les reservations d'une entreprise");
@@ -27,7 +27,6 @@ int main()
             {
                 printf("\n### Afficher toutes les reservations ###\n");
                 afficher_abr(arbre);
-
                 break;
             }
             case '2' :
@@ -43,8 +42,7 @@ int main()
             case '4':
             {
                 printf("\n### Ajouter une reservation ###\n\n");
-                //TODO verifier les intervalles si elles ont bien que 4 chiffre
-                //TODO verfier que date deb et inferieur a date fin
+
                 int id;
                 char* objet[MAX_STR];
                 T_Inter intervalle;
@@ -55,8 +53,10 @@ int main()
                     break;
                 }
                 viderBuffer();
+
                 printf("Veuillez entrer l'objet de votre reservation : ");
                 fgets(objet, MAX_STR, stdin);
+                objet[strcspn(objet, "\n")] = '\0';
 
                 printf("Veuillez entrer la date de debut sous le format MMJJ : ");
                 if (!scanf("%d", &intervalle.deb)) {
@@ -67,6 +67,10 @@ int main()
                 printf("Veuillez entrer la date de debut sous le format MMJJ : ");
                 if (!scanf("%d", &intervalle.fin)) {
                     printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+                if (verifier_intervalle(intervalle) == 1){
+                    printf("ERREUR : Ce n'est pas une date valide");
                     break;
                 }
 
@@ -92,7 +96,6 @@ int main()
                 printf("\n======== PROGRAMME TERMINE ========\n");
                 break;
             }
-
             default :
                 printf("\n\nERREUR : votre choix n'est pas valide ! ");
         }

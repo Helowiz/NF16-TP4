@@ -4,12 +4,15 @@
 #include "tp4.h"
 #include "../Pile/pile.h"
 
+#define MAX_DATE 1231
+#define MIN_DATE 101
+
 T_Noeud *creer_noeud(int id_entr, char *objet, T_Inter intervalle)
 {
     T_Noeud* n = (T_Noeud*)malloc(sizeof(T_Noeud));
     n->droit = n->gauche = NULL;
     n->id_entr = id_entr;
-    n->objet = objet;
+    n->objet = strdup(objet);
     n->inter = intervalle;
     return n;
 }
@@ -22,7 +25,7 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
     T_Noeud* pred = NULL;
     T_Noeud* current = abr;
 
-    while (current != NULL){ //  && compare_intervalle(intervalle, current->inter) != 0 verifire si les deux intervalle ne sont pas egale
+    while (current != NULL && current->inter.deb != intervalle.deb){
         pred = current;
         if (intervalle.deb < current->inter.deb) {
             current = current->gauche;
@@ -36,7 +39,7 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
     } else if (intervalle.deb > pred->inter.deb) {
         pred->droit = n;
     } else {
-        printf("Les intervalles se chevauche !");
+        printf("ERREUR : Une reservation est deja a cette date");
     }
     return;
 }
@@ -93,6 +96,7 @@ void afficher_abr(T_Arbre abr){
 
     if (abr == NULL){
         printf("\nL'arbre est vide");
+        return;
     }
 
     Pile* p = creer_pile();
@@ -104,10 +108,27 @@ void afficher_abr(T_Arbre abr){
             current = current->gauche;
         }
 		current = depiler(p);
-        printf("%d/%d/2024 au %d/%d/2024 : entr. %d - %s", current->inter.deb%100, current->inter.deb%100, current->inter.fin%100, current->inter.fin%100,current->id_entr, current->objet);
+
+		afficher_date(current->inter.deb%100);
+		afficher_date(current->inter.deb/100);
+		printf("2024 au ");
+		afficher_date(current->inter.fin%100);
+		afficher_date(current->inter.fin/100);
+        printf("2024 : entr. %d - %s", current->id_entr, current->objet);
+
         current = current->droit;
     }
 }
+
+void afficher_date(int valeur) {
+    if (valeur < 10) {
+        printf("0%d/", valeur);
+    } else {
+        printf("%d/", valeur);
+    }
+}
+
+
 void afficher_entr(T_Arbre abr, int id_entr){
     Pile* p = creer_pile();
 	T_Noeud* current = abr;
@@ -154,7 +175,7 @@ void viderBuffer(){
 }
 
 int compare_intervalle(T_Inter inter1, T_Inter inter2){
-    //TODO
+
     return 0;
 }
 
@@ -171,4 +192,32 @@ T_Noeud* minimum(T_Arbre* abr){
 
 void afficher_noeud(T_Noeud* n){
     printf("Identifiant entreprise : %d \nObjet : %s Date debut : %d, Date fin : %d", n->id_entr, n->objet, n->inter.deb, n->inter.fin);
+}
+
+int verifier_date(int date){
+    int jour = date % 100;
+    int mois = date / 100;
+
+    if (mois < 1 || mois > 12) return 0;
+
+    switch (mois) {
+        case 2: // Février
+            if (jour < 1 || jour > 28) return 0;
+            break;
+        case 4: case 6: case 9: case 11:
+            if (jour < 1 || jour > 30) return 0;
+            break;
+        default:
+            if (jour < 1 || jour > 31) return 0;
+            break;
+    }
+    return 1;
+}
+
+int verifier_intervalle(T_Inter inter) {
+    return inter.deb < MIN_DATE ||
+           inter.fin > MAX_DATE ||
+           inter.deb > inter.fin ||
+           !est_date_valide(inter.deb) ||
+           !est_date_valide(inter.fin));
 }

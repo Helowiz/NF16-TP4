@@ -36,5 +36,6 @@ void viderBuffer();
 T_Noeud* predecesseur(T_Arbre* abr, T_Noeud* n);
 T_Noeud* minimum(T_Arbre* abr);
 void afficher_noeud(T_Noeud* n);
+void afficher_date(int valeur);
 
 #endif
