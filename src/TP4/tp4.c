@@ -23,7 +23,7 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
 
     T_Noeud* n = creer_noeud(id_entr, objet, intervalle);
     T_Noeud* pred = NULL;
-    T_Noeud* current = abr;
+    T_Noeud* current = *abr;
 
     while (current != NULL && current->inter.deb != intervalle.deb){
         pred = current;
@@ -44,36 +44,46 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
     return;
 }
 T_Noeud* rechercher(T_Arbre abr, T_Inter intervalle, int id_entr){
-    while(abr != NULL /*&& Cle[abrre] != cle*/ ){ /*TODO rechercher avec id entre v�rifier que c'est �gale*/
-        if(intervalle.fin < abr->inter.deb) {
-            abr = abr->gauche;
+    T_Noeud* current = abr;
+    while(current != NULL){
+        if (current->inter.deb == intervalle.deb &&
+            current->inter.fin == intervalle.fin &&
+            current->id_entr == id_entr) {
+            return current;
+        }
+
+        if(intervalle.fin < current->inter.deb) {
+            current = current->gauche;
         } else {
-            abr = abr->droit;
+            current = current->droit;
         }
     }
-    return abr;
+    return NULL;
 }
 void supprimer(T_Arbre *abr, T_Inter intervalle, int id_entr){
-    if (abr == NULL) return;
+    if (*abr == NULL) return;
 
-    T_Noeud* n = rechercher(abr, intervalle, id_entr);
+    T_Noeud* n = rechercher(*abr, intervalle, id_entr);
+    if (n == NULL) return
+
+    afficher_noeud(n);
     T_Noeud* pred = predecesseur(abr, n);
 
     if (n->gauche == NULL && n->droit == NULL) {
         if (pred == NULL) {
-            abr = NULL;
+            *abr = NULL;
         } else if (n == pred->gauche) {
             pred->gauche = NULL;
         } else {
             pred->droit = NULL;
         }
+        free(n->objet);
         free(n);
     } else if (n->gauche == NULL || n->droit == NULL) {
         T_Noeud* fils = (n->gauche != NULL) ? n->gauche : n->droit;
         n = pred;
-
         if (n == NULL) {
-            abr = n;
+            *abr = n;
         } else if (n == pred->gauche) {
             pred->gauche = n;
         } else {
@@ -87,6 +97,7 @@ void supprimer(T_Arbre *abr, T_Inter intervalle, int id_entr){
     }
 }
 void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
+    if (abr == NULL) return;
     T_Noeud* current = rechercher(abr, actuel, id_entr);
     supprimer(abr, actuel, id_entr);
     ajouter(abr, id_entr, current->objet, nouveau);
@@ -180,21 +191,35 @@ int compare_intervalle(T_Inter inter1, T_Inter inter2){
 }
 
 T_Noeud* predecesseur(T_Arbre* abr, T_Noeud* n){
-    //TODO
-    T_Noeud* p = NULL;
-    return p;
+    T_Noeud* pred = NULL;
+    T_Noeud* current = abr;
+    while (current != NULL) {
+        if (current->inter.deb == n->inter.deb &&
+            current->inter.fin == n->inter.fin &&
+            current->id_entr == n->id_entr) {
+            return pred;
+        }
+        pred = current;
+        if(n->inter.fin < current->inter.deb) {
+            current = current->gauche;
+        } else {
+            current = current->droit;
+        }
+    }
+    return NULL;
 }
-T_Noeud* minimum(T_Arbre* abr){
-    //TODO
-    T_Noeud* p = NULL;
-    return p;
+T_Noeud* minimum(T_Noeud* n){
+    while (n->gauche != NULL) {
+        n = n->gauche;
+    }
+    return n;
 }
 
 void afficher_noeud(T_Noeud* n){
     printf("Identifiant entreprise : %d \nObjet : %s Date debut : %d, Date fin : %d", n->id_entr, n->objet, n->inter.deb, n->inter.fin);
 }
 
-int verifier_date(int date){
+int est_date_valide(int date){
     int jour = date % 100;
     int mois = date / 100;
 
@@ -215,9 +240,5 @@ int verifier_date(int date){
 }
 
 int verifier_intervalle(T_Inter inter) {
-    return inter.deb < MIN_DATE ||
-           inter.fin > MAX_DATE ||
-           inter.deb > inter.fin ||
-           !est_date_valide(inter.deb) ||
-           !est_date_valide(inter.fin));
+    return inter.deb < MIN_DATE || inter.fin > MAX_DATE || inter.deb > inter.fin || !est_date_valide(inter.deb) || !est_date_valide(inter.fin);
 }

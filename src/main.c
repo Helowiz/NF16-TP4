@@ -77,18 +77,87 @@ int main()
                 if (arbre == NULL) {
                     arbre = creer_noeud(id, objet, intervalle);
                 } else {
-                    ajouter(arbre, id, objet, intervalle);
+                    ajouter(*arbre, id, objet, intervalle);
                 }
                 break;
             }
             case '5':
             {
-                printf("\n### Modifier une réservation ###\n");
+                printf("\n### Modifier une reservation ###\n");
+
+                int id;
+                T_Inter actuel;
+                T_Inter nouveau;
+
+                printf("Veuillez entrer l'identifiant de votre entreprise : ");
+                if (!scanf("%d", &id)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+
+                printf("DATE ACTUEL : Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &actuel.deb)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+                printf("DATE ACTUEL : Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &actuel.fin)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+                if (verifier_intervalle(actuel) == 1){
+                    printf("ERREUR : Ce n'est pas une date valide");
+                    break;
+                }
+
+                printf("DATE NOUVEL : Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &nouveau.deb)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+
+                printf("DATE NOUVEL : Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &nouveau.fin)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+                if (verifier_intervalle(nouveau) == 1){
+                    printf("ERREUR : Ce n'est pas une date valide");
+                    break;
+                }
+
+                modifier(arbre, id, actuel, nouveau);
                 break;
             }
             case '6':
             {
                 printf("\n### Supprimer une réservation ###\n");
+
+                int id;
+                T_Inter intervalle;
+
+                printf("Veuillez entrer l'identifiant de votre entreprise : ");
+                if (!scanf("%d", &id)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+
+                printf("Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &intervalle.deb)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+
+                printf("Veuillez entrer la date de debut sous le format MMJJ : ");
+                if (!scanf("%d", &intervalle.fin)) {
+                    printf("ERREUR : Le nombre saisi doit être un entier");
+                    break;
+                }
+                if (verifier_intervalle(intervalle) == 1){
+                    printf("ERREUR : Ce n'est pas une date valide");
+                    break;
+                }
+                supprimer(arbre, intervalle, id);
                 break;
             }
             case '7':
