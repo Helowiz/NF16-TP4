@@ -7,7 +7,8 @@
 
 int main()
 {
-    T_Arbre* arbre = NULL;
+    T_Arbre* arbre = (T_Arbre*)malloc(sizeof(T_Arbre));
+    *arbre = NULL;
     // ============= MENU UTILISATEUR ============= */
     char choix = '0';
     while (choix != '7') {
@@ -26,7 +27,7 @@ int main()
             case '1' :
             {
                 printf("\n### Afficher toutes les reservations ###\n");
-                afficher_abr(arbre);
+                afficher_abr(*arbre);
                 break;
             }
             case '2' :
@@ -74,11 +75,7 @@ int main()
                     break;
                 }
 
-                if (arbre == NULL) {
-                    arbre = creer_noeud(id, objet, intervalle);
-                } else {
-                    ajouter(*arbre, id, objet, intervalle);
-                }
+                ajouter(arbre, id, objet, intervalle);
                 break;
             }
             case '5':
@@ -126,12 +123,12 @@ int main()
                     break;
                 }
 
-                modifier(arbre, id, actuel, nouveau);
+                modifier(*arbre, id, actuel, nouveau);
                 break;
             }
             case '6':
             {
-                printf("\n### Supprimer une réservation ###\n");
+                printf("\n### Supprimer une reservation ###\n");
 
                 int id;
                 T_Inter intervalle;

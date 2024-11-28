@@ -33,7 +33,7 @@ void detruire_arbre(T_Arbre *abr);
 //FONCTION AJOUTEES
 int compare_intervalle(T_Inter inter1, T_Inter inter2);
 void viderBuffer();
-T_Noeud* predecesseur(T_Arbre* abr, T_Noeud* n);
+T_Noeud* predecesseur(T_Arbre abr, T_Noeud* n);
 T_Noeud* minimum(T_Noeud* n);
 void afficher_noeud(T_Noeud* n);
 void afficher_date(int valeur);
