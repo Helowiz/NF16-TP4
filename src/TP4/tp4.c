@@ -17,8 +17,7 @@ T_Noeud *creer_noeud(int id_entr, char *objet, T_Inter intervalle)
     return n;
 }
 
-void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
-{
+void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle){
     if(*abr == NULL){
         *abr = creer_noeud(id_entr, objet, intervalle);
         return;
@@ -28,13 +27,14 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
     T_Noeud* pred = NULL;
     T_Noeud* current = *abr;
 
-    while (current != NULL && current->inter.deb != intervalle.deb){
+    while (current && current->inter.deb != intervalle.deb){
         pred = current;
-        if (intervalle.deb < current->inter.deb) {
-            current = current->gauche;
-        } else {
-            current = current->droit;
-        }
+        current = intervalle.deb < current->inter.deb ? current->gauche : current->droit;
+    }
+
+    if(pred == NULL){
+        printf("ERREUR : Une reservation est deja a cette date");
+        return;
     }
 
     if (intervalle.deb < pred->inter.deb) {
@@ -46,25 +46,29 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle)
     }
     return;
 }
+
 T_Noeud* rechercher(T_Arbre abr, T_Inter intervalle, int id_entr){
+    if (abr == NULL){
+        printf("L'arbre est vide\n");
+    }
+
     T_Noeud* current = abr;
-    while(current != NULL){
+    while(current){
         if (current->inter.deb == intervalle.deb &&
             current->inter.fin == intervalle.fin &&
             current->id_entr == id_entr) {
             return current;
         }
-
-        if(intervalle.fin < current->inter.deb) {
-            current = current->gauche;
-        } else {
-            current = current->droit;
-        }
+        current = intervalle.fin < current->inter.deb ? current->gauche : current->droit;
     }
-    return NULL;
+    return current;
 }
+
 void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
-    if (*abr == NULL) return;
+    if (*abr == NULL){
+        printf("L'arbre est vide\n");
+        return;
+    }
 
     T_Noeud* n = rechercher(*abr, intervalle, id_entr);
     if (n == NULL) return;
@@ -83,8 +87,8 @@ void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
         free(n);
         n = NULL;
     } else if (n->gauche == NULL || n->droit == NULL) {
-        T_Noeud* fils = (n->gauche != NULL) ? n->gauche : n->droit;
-        if (pred == NULL) { //racine
+        T_Noeud* fils = n->gauche ? n->gauche : n->droit;
+        if (pred == NULL) { //Racine
             *abr = fils;
         } else if (n == pred->gauche) {
             pred->gauche = fils;
@@ -104,11 +108,14 @@ void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
     return;
 }
 void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
-    if (abr == NULL) return;
-    T_Noeud* current = rechercher(abr, actuel, id_entr);
-    if (current == NULL) {
+    if (abr == NULL){
+        printf("Aucune date n'est enregistree\n");
         return;
     }
+
+    T_Noeud* current = rechercher(abr, actuel, id_entr);
+    if (current == NULL) return; 
+
     char* objet_copie = strdup(current->objet);
     supprimer(&abr, actuel, id_entr);
     ajouter(&abr, id_entr, objet_copie, nouveau);
@@ -117,76 +124,84 @@ void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
 void afficher_abr(T_Arbre abr){
 
     if (abr == NULL){
-        printf("\nL'arbre est vide");
+        printf("Aucune date n'est enregistree\n");
         return;
     }
 
     Pile* p = creer_pile();
 	T_Noeud* current = abr;
 
-	while ((current != NULL ) || ( !est_vide(p))) {
-        while (current != NULL) {
+	while ((current) || ( !est_vide(p))) {
+        while (current) {
             empiler(p, current);
             current = current->gauche;
         }
 		current = depiler(p);
-
-		afficher_date(current->inter.deb%100);
-		afficher_date(current->inter.deb/100);
-		printf("2024 au ");
-		afficher_date(current->inter.fin%100);
-		afficher_date(current->inter.fin/100);
-        printf("2024 : entr. %d - %s", current->id_entr, current->objet);
-
+	    printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n", current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
         current = current->droit;
     }
 }
 
-void afficher_date(int valeur) {
-    if (valeur < 10) {
-        printf("0%d/", valeur);
-    } else {
-        printf("%d/", valeur);
-    }
-}
-
-
 void afficher_entr(T_Arbre abr, int id_entr){
+
+    if (abr == NULL){
+        printf("Aucune entreprise n'est enregistree\n");
+        return;
+    }
+
     Pile* p = creer_pile();
 	T_Noeud* current = abr;
 
-	while ((current != NULL ) || ( !est_vide(p))) {
-        if (current->id_entr == id_entr) {
-            while (current != NULL ) {
+    printf("Reservations de l'entreprise %d :\n", id_entr);
+	while ((current) || (!est_vide(p))) {
+            while (current) {
                 empiler(p, current);
                 current = current->gauche;
             }
-            current = depiler(p);
-            printf("%d", current->id_entr);
+            current = depiler(p); 
+            if (current->id_entr == id_entr)printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n", current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
             current = current->droit;
-        }
     }
 }
 void afficher_periode(T_Arbre abr, T_Inter periode){
+    if (abr == NULL) {
+        printf("Aucune reservation trouvee pour la periode donnee (%02d/%02d au %02d/%02d).\n",
+               periode.deb / 100, periode.deb % 100,
+               periode.fin / 100, periode.fin % 100);
+        return;
+    }
     Pile* p = creer_pile();
-	T_Noeud* current = abr;
-
-	while ((current != NULL ) || ( !est_vide(p))) {
-        if (1) { /*debI >= debP && finI <= finP*/
-            while (current != NULL ) {
-                empiler(p, current);
-                current = current->gauche;
-            }
-            current = depiler(p);
-            printf("%d", current->id_entr);
-            current = current->droit;
+    T_Noeud* current = abr;
+    int found = 0;
+    while ((current) || (!est_vide(p))) {
+        while (current) {
+            empiler(p, current);
+            current = current->gauche;
         }
+        current = depiler(p);
+        if ((current->inter.deb <= periode.fin) && (current->inter.fin >= periode.deb)) {
+            found = 1;
+            printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n", current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
+        }
+        current = current->droit;
+    }
+    if (!found) {
+        printf("Aucune reservation trouvee pour la periode donnee (%02d/%02d au %02d/%02d).\n",
+               periode.deb / 100, periode.deb % 100,
+               periode.fin / 100, periode.fin % 100);
     }
 }
 
-void detruire_arbre(T_Arbre *abr){
-    // TODO
-    return;
+void detruire_arbre(T_Arbre *abr) {
+    if (*abr == NULL) {
+        return;
+    }
+    detruire_arbre(&(*abr)->gauche);
+    detruire_arbre(&(*abr)->droit);
+
+    free((*abr)->objet);
+    free(*abr);
+    *abr = NULL;
 }
 
 void viderBuffer(){
@@ -196,17 +211,12 @@ void viderBuffer(){
     } while (c != '\n' && c != EOF);
 }
 
-int compare_intervalle(T_Inter inter1, T_Inter inter2){
-
-    return 0;
-}
-
 T_Noeud* predecesseur(T_Arbre abr, T_Noeud* n){
     T_Noeud* pred = NULL;
     T_Noeud* current = abr;
 
 
-    while (current != NULL) {
+    while (current) {
         if (current->inter.deb == n->inter.deb &&
             current->inter.fin == n->inter.fin &&
             current->id_entr == n->id_entr) {
@@ -222,18 +232,10 @@ T_Noeud* predecesseur(T_Arbre abr, T_Noeud* n){
     return pred;
 }
 T_Noeud* minimum(T_Noeud* n){
-    while (n->gauche != NULL) {
+    while (n->gauche) {
         n = n->gauche;
     }
     return n;
-}
-
-void afficher_noeud(T_Noeud* n){
-    if (n == NULL) {
-        printf("NULL\n");
-        return;
-    }
-    printf("Identifiant entreprise : %d \nObjet : %s Date debut : %d, Date fin : %d", n->id_entr, n->objet, n->inter.deb, n->inter.fin);
 }
 
 int est_date_valide(int date){
@@ -243,7 +245,7 @@ int est_date_valide(int date){
     if (mois < 1 || mois > 12) return 0;
 
     switch (mois) {
-        case 2: // Février
+        case 2: // Fevrier
             if (jour < 1 || jour > 28) return 0;
             break;
         case 4: case 6: case 9: case 11:

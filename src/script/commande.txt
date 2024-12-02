@@ -1,0 +1,1 @@
+script\main.exe < tests\in-XX.txt

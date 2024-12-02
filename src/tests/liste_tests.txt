@@ -1,0 +1,16 @@
+10 : Affichage de l'arbre
+
+20 : Affichage des reservations d'une entreprise
+30 : Affichage des reservations sur une période
+40 : Ajout d'un nœud quand l'arbre est vide
+41 : Ajout d'un fils gauche quand l'arbre n'est pas vide
+42 : Ajout d'un fils droit quand l'arbre n'est pas vide
+43 : Ajout d'un fils quand la date debut existe déjà
+60 : Suppression d'un nœud qui est la racine avec 0 fils
+61 : Suppression d'un nœud qui est la racine avec 1 fils gauche
+62 : Suppression d'un nœud qui est la racine avec 1 fils droit
+63 : Suppression d'un nœud qui est la racine avec 2 fils
+64 : Suppression d'un nœud avec aucun fils
+65 : Suppression d'un nœud avec un fil droit
+66 : Suppression d'un nœud avec un fils gauche
+67 : Suppression d'un nœud avec deux fils
