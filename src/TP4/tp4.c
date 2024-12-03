@@ -33,7 +33,7 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle){
     }
 
     if(pred == NULL){
-        printf("ERREUR : Une reservation est deja a cette date");
+        printf("ERREUR : Une reservation est deja a cette date"); // TODO free
         return;
     }
 
@@ -43,6 +43,7 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle){
         pred->droit = n;
     } else {
         printf("ERREUR : Une reservation est deja a cette date");
+    // TODO free
     }
     return;
 }
@@ -70,10 +71,10 @@ void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
         return;
     }
 
-    T_Noeud* n = rechercher(*abr, intervalle, id_entr);
+    T_Noeud* n = rechercher(*abr, intervalle, id_entr); // TODO 2 en 1
     if (n == NULL) return;
 
-    T_Noeud* pred = predecesseur(*abr, n);
+    T_Noeud* pred = predecesseur(*abr, n); // TODO 3 en 1
 
     if (n->gauche == NULL && n->droit == NULL) {
         if (pred == NULL) { //Racine
@@ -113,7 +114,7 @@ void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
         return;
     }
 
-    T_Noeud* current = rechercher(abr, actuel, id_entr);
+    T_Noeud* current = rechercher(abr, actuel, id_entr); // TODO 4 en 1
     if (current == NULL) return; 
 
     char* objet_copie = strdup(current->objet);
@@ -137,7 +138,8 @@ void afficher_abr(T_Arbre abr){
             current = current->gauche;
         }
 		current = depiler(p);
-	    printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n", current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
+	    printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n",
+        current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
         current = current->droit;
     }
 }

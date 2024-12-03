@@ -1,5 +1,4 @@
 10 : Affichage de l'arbre
-
 20 : Affichage des reservations d'une entreprise
 30 : Affichage des reservations sur une période
 40 : Ajout d'un nœud quand l'arbre est vide
