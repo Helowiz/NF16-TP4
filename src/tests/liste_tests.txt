@@ -5,6 +5,9 @@
 41 : Ajout d'un fils gauche quand l'arbre n'est pas vide
 42 : Ajout d'un fils droit quand l'arbre n'est pas vide
 43 : Ajout d'un fils quand la date debut existe déjà
+44 : Ajout de plusieurs reservations, teste le chevauchement
+45 : Test donnée pendant la seance de demo
+50 : Modification d'un noeud
 60 : Suppression d'un nœud qui est la racine avec 0 fils
 61 : Suppression d'un nœud qui est la racine avec 1 fils gauche
 62 : Suppression d'un nœud qui est la racine avec 1 fils droit

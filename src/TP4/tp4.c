@@ -29,11 +29,22 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle){
 
     while (current && current->inter.deb != intervalle.deb){
         pred = current;
-        current = intervalle.deb < current->inter.deb ? current->gauche : current->droit;
+        if (intervalle.fin < current->inter.deb) {
+            current = current->gauche;
+        } else if (intervalle.deb > current->inter.fin) {
+            current = current->droit;
+        } else {
+            printf("ERREUR : Une reservation est deja a cette date\n");
+            free(n->objet);
+            free(n);
+            return;
+        }
     }
 
     if(pred == NULL){
-        printf("ERREUR : Une reservation est deja a cette date"); // TODO free
+        printf("ERREUR : Une reservation est deja a cette date");
+        free(n->objet);
+        free(n);
         return;
     }
 
@@ -43,7 +54,8 @@ void ajouter(T_Arbre *abr, int id_entr, char *objet, T_Inter intervalle){
         pred->droit = n;
     } else {
         printf("ERREUR : Une reservation est deja a cette date");
-    // TODO free
+        free(n->objet);
+        free(n);
     }
     return;
 }
@@ -71,40 +83,48 @@ void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
         return;
     }
 
-    T_Noeud* n = rechercher(*abr, intervalle, id_entr); // TODO 2 en 1
-    if (n == NULL) return;
-
-    T_Noeud* pred = predecesseur(*abr, n); // TODO 3 en 1
-
-    if (n->gauche == NULL && n->droit == NULL) {
-        if (pred == NULL) { //Racine
-            *abr = NULL;
-        } else if (n == pred->gauche) {
-            pred->gauche = NULL;
+    T_Noeud* pred = NULL;
+    T_Noeud* current = *abr;
+    while (current) {
+        if (current->inter.deb == intervalle.deb &&
+            current->inter.fin == intervalle.fin &&
+            current->id_entr == id_entr) {
+            //Suppression
+            if (current->gauche == NULL && current->droit == NULL) {
+                if (pred == NULL) { //Racine
+                    *abr = NULL;
+                } else if (current == pred->gauche) {
+                    pred->gauche = NULL;
+                } else {
+                    pred->droit = NULL;
+                }
+                free(current->objet);
+                free(current);
+                current = NULL;
+            } else if (current->gauche == NULL || current->droit == NULL) {
+                T_Noeud* fils = current->gauche ? current->gauche : current->droit;
+                if (pred == NULL) { //Racine
+                    *abr = fils;
+                } else if (current == pred->gauche) {
+                    pred->gauche = fils;
+                } else {
+                    pred->droit = fils;
+                }
+                free(current->objet);
+                free(current);
+                current = NULL;
+            } else {
+                T_Noeud* succ = minimum(current->droit);
+                current->inter = succ->inter;
+                current->id_entr = succ->id_entr;
+                current->objet = strdup(succ->objet);
+                supprimer(&(current->droit), succ->inter, succ->id_entr);
+            }
+            return;
         } else {
-            pred->droit = NULL;
+            pred = current;
+            current = intervalle.fin < current->inter.deb ? current->gauche : current->droit;
         }
-        free(n->objet);
-        free(n);
-        n = NULL;
-    } else if (n->gauche == NULL || n->droit == NULL) {
-        T_Noeud* fils = n->gauche ? n->gauche : n->droit;
-        if (pred == NULL) { //Racine
-            *abr = fils;
-        } else if (n == pred->gauche) {
-            pred->gauche = fils;
-        } else {
-            pred->droit = fils;
-        }
-        free(n->objet);
-        free(n);
-        n = NULL;
-    } else {
-        T_Noeud* succ = minimum(n->droit);
-        n->inter = succ->inter;
-        n->id_entr = succ->id_entr;
-        n->objet = strdup(succ->objet);
-        supprimer(&(n->droit), succ->inter, succ->id_entr);
     }
     return;
 }
@@ -113,13 +133,54 @@ void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
         printf("Aucune date n'est enregistree\n");
         return;
     }
+    
+    T_Noeud* pred = NULL;
+    T_Noeud* current = abr;
 
-    T_Noeud* current = rechercher(abr, actuel, id_entr); // TODO 4 en 1
-    if (current == NULL) return; 
-
-    char* objet_copie = strdup(current->objet);
-    supprimer(&abr, actuel, id_entr);
-    ajouter(&abr, id_entr, objet_copie, nouveau);
+    while (current) {
+        if (current->inter.deb == actuel.deb &&
+            current->inter.fin == actuel.fin &&
+            current->id_entr == id_entr) {
+            char* objet_copie = strdup(current->objet);
+            //Suppresion
+            if (current->gauche == NULL && current->droit == NULL) {
+                if (pred == NULL) { //Racine
+                    abr = NULL;
+                } else if (current == pred->gauche) {
+                    pred->gauche = NULL;
+                } else {
+                    pred->droit = NULL;
+                }
+                free(current->objet);
+                free(current);
+                current = NULL;
+            } else if (current->gauche == NULL || current->droit == NULL) {
+                T_Noeud* fils = current->gauche ? current->gauche : current->droit;
+                if (pred == NULL) { //Racine
+                    abr = fils;
+                } else if (current == pred->gauche) {
+                    pred->gauche = fils;
+                } else {
+                    pred->droit = fils;
+                }
+                free(current->objet);
+                free(current);
+                current = NULL;
+            } else {
+                T_Noeud* succ = minimum(current->droit);
+                current->inter = succ->inter;
+                current->id_entr = succ->id_entr;
+                current->objet = strdup(succ->objet);
+                supprimer(&(current->droit), succ->inter, succ->id_entr);
+            }
+            ajouter(&abr, id_entr, objet_copie, nouveau);
+            return;
+        } else {
+            pred = current;
+            current = actuel.fin < current->inter.deb ? current->gauche : current->droit;
+        }
+    }
+    printf("ERREUR : le noeud n'a pas ete trouve");
     return;
 }
 void afficher_abr(T_Arbre abr){
@@ -160,7 +221,7 @@ void afficher_entr(T_Arbre abr, int id_entr){
                 empiler(p, current);
                 current = current->gauche;
             }
-            current = depiler(p); 
+            current = depiler(p);
             if (current->id_entr == id_entr)printf("%02d/%02d/2024 au %02d/%02d/2024 : entr. %d - %s\n", current->inter.deb % 100, current->inter.deb / 100, current->inter.fin % 100, current->inter.fin / 100, current->id_entr, current->objet);
             current = current->droit;
     }
@@ -213,26 +274,6 @@ void viderBuffer(){
     } while (c != '\n' && c != EOF);
 }
 
-T_Noeud* predecesseur(T_Arbre abr, T_Noeud* n){
-    T_Noeud* pred = NULL;
-    T_Noeud* current = abr;
-
-
-    while (current) {
-        if (current->inter.deb == n->inter.deb &&
-            current->inter.fin == n->inter.fin &&
-            current->id_entr == n->id_entr) {
-            return pred;
-        }
-        pred = current;
-        if(n->inter.fin < current->inter.deb) {
-            current = current->gauche;
-        } else {
-            current = current->droit;
-        }
-    }
-    return pred;
-}
 T_Noeud* minimum(T_Noeud* n){
     while (n->gauche) {
         n = n->gauche;

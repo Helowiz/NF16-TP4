@@ -88,7 +88,7 @@ int main()
                 printf("\n### Ajouter une reservation ###\n\n");
 
                 int id;
-                char* objet[MAX_STR];
+                char* objet = malloc(MAX_STR * sizeof(char));
                 T_Inter intervalle;
 
                 printf("Veuillez entrer l'identifiant de votre entreprise : ");
@@ -99,9 +99,10 @@ int main()
                 viderBuffer();
 
                 printf("Veuillez entrer l'objet de votre reservation : ");
-                fgets(*objet, MAX_STR, stdin);
-                objet[strcspn(*objet, "\n")] = '\0';
 
+                fgets(objet, MAX_STR, stdin);
+                objet[strcspn(objet, "\n")] = '\0';
+                printf("%s", objet);
                 printf("Entrez la date de debut de la periode (format MMJJ) :");
                 if (!scanf("%d", &intervalle.deb)) {
                     printf("ERREUR : Le nombre saisi doit être un entier");
@@ -118,7 +119,7 @@ int main()
                     break;
                 }
 
-                ajouter(arbre, id, *objet, intervalle);
+                ajouter(arbre, id, objet, intervalle);
                 break;
             }
             case '5':
@@ -161,15 +162,17 @@ int main()
                     break;
                 }
                 printf("Entrez la nouvelle date de fin de la periode (format MMJJ) : ");
+                
                 if (!scanf("%d", &nouveau.fin)) {
+                
                     printf("ERREUR : Le nombre saisi doit être un entier");
                     break;
                 }
+                
                 if (verifier_intervalle(nouveau)){
                     printf("ERREUR : Ce n'est pas une date valide");
                     break;
                 }
-
                 modifier(*arbre, id, actuel, nouveau);
                 break;
             }
