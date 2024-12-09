@@ -86,48 +86,17 @@ void supprimer(T_Arbre* abr, T_Inter intervalle, int id_entr){
     T_Noeud* pred = NULL;
     T_Noeud* current = *abr;
     while (current) {
-        if (current->inter.deb == intervalle.deb &&
-            current->inter.fin == intervalle.fin &&
-            current->id_entr == id_entr) {
-            //Suppression
-            if (current->gauche == NULL && current->droit == NULL) {
-                if (pred == NULL) { //Racine
-                    *abr = NULL;
-                } else if (current == pred->gauche) {
-                    pred->gauche = NULL;
-                } else {
-                    pred->droit = NULL;
-                }
-                free(current->objet);
-                free(current);
-                current = NULL;
-            } else if (current->gauche == NULL || current->droit == NULL) {
-                T_Noeud* fils = current->gauche ? current->gauche : current->droit;
-                if (pred == NULL) { //Racine
-                    *abr = fils;
-                } else if (current == pred->gauche) {
-                    pred->gauche = fils;
-                } else {
-                    pred->droit = fils;
-                }
-                free(current->objet);
-                free(current);
-                current = NULL;
-            } else {
-                T_Noeud* succ = minimum(current->droit);
-                current->inter = succ->inter;
-                current->id_entr = succ->id_entr;
-                current->objet = strdup(succ->objet);
-                supprimer(&(current->droit), succ->inter, succ->id_entr);
-            }
+        if (current->inter.deb == intervalle.deb && current->inter.fin == intervalle.fin && current->id_entr == id_entr) {
+            suppression(abr, current, pred);
             return;
-        } else {
-            pred = current;
-            current = intervalle.fin < current->inter.deb ? current->gauche : current->droit;
         }
+        pred = current;
+        current = intervalle.fin < current->inter.deb ? current->gauche : current->droit;
     }
+    printf("ERREUR : Le noeud n'a pas ete trouve");
     return;
 }
+
 void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
     if (abr == NULL){
         printf("Aucune date n'est enregistree\n");
@@ -136,53 +105,20 @@ void modifier(T_Arbre abr, int id_entr, T_Inter actuel, T_Inter nouveau){
     
     T_Noeud* pred = NULL;
     T_Noeud* current = abr;
-
     while (current) {
-        if (current->inter.deb == actuel.deb &&
-            current->inter.fin == actuel.fin &&
-            current->id_entr == id_entr) {
-            char* objet_copie = strdup(current->objet);
-            //Suppresion
-            if (current->gauche == NULL && current->droit == NULL) {
-                if (pred == NULL) { //Racine
-                    abr = NULL;
-                } else if (current == pred->gauche) {
-                    pred->gauche = NULL;
-                } else {
-                    pred->droit = NULL;
-                }
-                free(current->objet);
-                free(current);
-                current = NULL;
-            } else if (current->gauche == NULL || current->droit == NULL) {
-                T_Noeud* fils = current->gauche ? current->gauche : current->droit;
-                if (pred == NULL) { //Racine
-                    abr = fils;
-                } else if (current == pred->gauche) {
-                    pred->gauche = fils;
-                } else {
-                    pred->droit = fils;
-                }
-                free(current->objet);
-                free(current);
-                current = NULL;
-            } else {
-                T_Noeud* succ = minimum(current->droit);
-                current->inter = succ->inter;
-                current->id_entr = succ->id_entr;
-                current->objet = strdup(succ->objet);
-                supprimer(&(current->droit), succ->inter, succ->id_entr);
-            }
+        if (current->inter.deb == actuel.deb && current->inter.fin == actuel.fin && current->id_entr == id_entr) {
+            char* objet_copie = strdup(current->objet); 
+            suppression(&abr, current, pred);
             ajouter(&abr, id_entr, objet_copie, nouveau);
             return;
-        } else {
-            pred = current;
-            current = actuel.fin < current->inter.deb ? current->gauche : current->droit;
         }
+        pred = current;
+        current = actuel.fin < current->inter.deb ? current->gauche : current->droit;
     }
-    printf("ERREUR : le noeud n'a pas ete trouve");
+    printf("ERREUR : Le noeud n'a pas ete trouve");
     return;
 }
+
 void afficher_abr(T_Arbre abr){
 
     if (abr == NULL){
@@ -303,4 +239,38 @@ int est_date_valide(int date){
 
 int verifier_intervalle(T_Inter inter) {
     return inter.deb < MIN_DATE || inter.fin > MAX_DATE || inter.deb > inter.fin || !est_date_valide(inter.deb) || !est_date_valide(inter.fin);
+}
+
+void suppression(T_Arbre* abr, T_Noeud* n, T_Noeud* p){
+    if (n->gauche == NULL && n->droit == NULL) {
+        if (p == NULL) { //Racine
+            *abr = NULL;
+        } else if (n == p->gauche) {
+            p->gauche = NULL;
+        } else {
+            p->droit = NULL;
+        }
+        free(n->objet);
+        free(n);
+        n = NULL;
+    } else if (n->gauche == NULL || n->droit == NULL) {
+        T_Noeud* fils = n->gauche ? n->gauche : n->droit;
+        if (p == NULL) { //Racine
+            *abr = fils;
+        } else if (n == p->gauche) {
+            p->gauche = fils;
+        } else {
+            p->droit = fils;
+        }
+        free(n->objet);
+        free(n);
+        n = NULL;
+    } else {
+        T_Noeud* succ = minimum(n->droit);
+        n->inter = succ->inter;
+        n->id_entr = succ->id_entr;
+        n->objet = strdup(succ->objet);
+        supprimer(&(n->droit), succ->inter, succ->id_entr);
+    }
+    return;
 }
