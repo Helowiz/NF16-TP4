@@ -241,36 +241,50 @@ int verifier_intervalle(T_Inter inter) {
     return inter.deb < MIN_DATE || inter.fin > MAX_DATE || inter.deb > inter.fin || !est_date_valide(inter.deb) || !est_date_valide(inter.fin);
 }
 
-void suppression(T_Arbre* abr, T_Noeud* n, T_Noeud* p){
-    if (n->gauche == NULL && n->droit == NULL) {
-        if (p == NULL) { //Racine
+void suppression(T_Arbre* abr, T_Noeud* current, T_Noeud* pred){
+    if (current->gauche == NULL && current->droit == NULL) {
+        if (pred == NULL) { //Racine
             *abr = NULL;
-        } else if (n == p->gauche) {
-            p->gauche = NULL;
+        } else if (current == pred->gauche) {
+            pred->gauche = NULL;
         } else {
-            p->droit = NULL;
+            pred->droit = NULL;
         }
-        free(n->objet);
-        free(n);
-        n = NULL;
-    } else if (n->gauche == NULL || n->droit == NULL) {
-        T_Noeud* fils = n->gauche ? n->gauche : n->droit;
-        if (p == NULL) { //Racine
+        free(current->objet);
+        free(current);
+        current = NULL;
+    } else if (current->gauche == NULL || current->droit == NULL) {
+        T_Noeud* fils = current->gauche ? current->gauche : current->droit;
+        if (pred == NULL) { //Racine
             *abr = fils;
-        } else if (n == p->gauche) {
-            p->gauche = fils;
+        } else if (current == pred->gauche) {
+            pred->gauche = fils;
         } else {
-            p->droit = fils;
+            pred->droit = fils;
         }
-        free(n->objet);
-        free(n);
-        n = NULL;
+        free(current->objet);
+        free(current);
+        current = NULL;
     } else {
-        T_Noeud* succ = minimum(n->droit);
-        n->inter = succ->inter;
-        n->id_entr = succ->id_entr;
-        n->objet = strdup(succ->objet);
-        supprimer(&(n->droit), succ->inter, succ->id_entr);
+        T_Noeud *succ_pred = current;
+        T_Noeud *succ = current->droit;
+        while (succ->gauche) { //minimum
+            succ_pred = succ;
+            succ = succ->gauche;
+        }
+
+        current->inter = succ->inter;
+        current->id_entr = succ->id_entr;
+        current->objet = strdup(succ->objet);
+
+        if (succ_pred->gauche == succ) {
+            succ_pred->gauche = succ->droit;
+        } else {
+            succ_pred->droit = succ->droit;
+        }
+        free(succ->objet);
+        free(succ);
+        succ = NULL;
     }
     return;
 }
